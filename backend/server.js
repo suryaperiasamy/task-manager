@@ -24,6 +24,11 @@ app.get("/", (req, res) => {
   res.send("Task Manager API is running!");
 });
 
+// Diagnostic route to test the /api prefix
+app.get("/api/test", (req, res) => {
+  res.json({ message: "API is working!", timestamp: new Date() });
+});
+
 // Mount routes
 // All authentication related requests will start with /api/auth
 app.use("/api/auth", authRoutes);
