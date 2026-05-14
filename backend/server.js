@@ -55,6 +55,14 @@ const connectDB = require("./config/db");
 // Database connection and Server startup
 const PORT = process.env.PORT || 5000;
 
+// Debug: Check if env variables are loaded (Censored for safety)
+console.log("--- Environment Variable Check ---");
+console.log("MONGO_URI:", process.env.MONGO_URI ? "LOADED ✅" : "MISSING ❌");
+console.log("EMAIL_USER:", process.env.EMAIL_USER ? "LOADED ✅" : "MISSING ❌");
+console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "LOADED ✅" : "MISSING ❌");
+console.log("FRONTEND_URL:", process.env.FRONTEND_URL || "NOT SET");
+console.log("---------------------------------");
+
 // Connect to MongoDB
 connectDB().then(() => {
   // Start the server only if the database connection is successful
