@@ -30,10 +30,19 @@ app.get("/api/test", (req, res) => {
 });
 
 // Mount routes
-// All authentication related requests will start with /api/auth
 app.use("/api/auth", authRoutes);
-// All task related requests will start with /api/tasks
 app.use("/api/tasks", taskRoutes);
+
+// Catch-all 404 handler for debugging
+app.use((req, res) => {
+  console.log(`404 Error: Path ${req.originalUrl} not found on this server.`);
+  res.status(404).json({
+    message: "Route not found",
+    path: req.originalUrl,
+    method: req.method,
+    suggestion: "Check if the path starts with /api/auth or /api/tasks"
+  });
+});
 
 const connectDB = require("./config/db");
 
