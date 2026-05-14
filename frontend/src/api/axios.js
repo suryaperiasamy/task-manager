@@ -1,8 +1,7 @@
 import axios from "axios";
 
-// Create an Axios instance with base URL
-const baseURL = import.meta.env.VITE_API_URL || "http://127.0.0.1:5001/api";
-console.log("Current API Base URL:", baseURL);
+// Create an Axios instance with the HARDCODED live link
+const baseURL = "https://task-manager-api-i25w.onrender.com/api";
 
 const API = axios.create({
   baseURL: baseURL,
