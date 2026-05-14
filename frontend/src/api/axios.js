@@ -1,7 +1,9 @@
 import axios from "axios";
 
-// Create an Axios instance with the HARDCODED live link
-const baseURL = "https://task-manager-api-i25w.onrender.com/api";
+// Automatically switch between local testing and live production
+const baseURL = import.meta.env.MODE === "development" 
+  ? "http://127.0.0.1:5001/api" 
+  : "https://task-manager-api-i25w.onrender.com/api";
 
 const API = axios.create({
   baseURL: baseURL,

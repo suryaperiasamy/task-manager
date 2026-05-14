@@ -8,41 +8,59 @@ const Login = () => {
     email: "",
     password: "",
   });
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  
+
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setError("");
     setLoading(true);
 
     try {
       const response = await API.post("/auth/login", formData);
-      
-      // Save user data and token to context
+
+      // Print backend response in browser console
+      console.log(response.data);
+
+      // Save user and token
       login(
-        { _id: response.data._id, name: response.data.name, email: response.data.email },
+        {
+          _id: response.data._id,
+          name: response.data.name,
+          email: response.data.email,
+        },
         response.data.token
       );
-      
-      // Redirect to dashboard on success
+
+      // Redirect to dashboard
       navigate("/dashboard");
     } catch (err) {
-      // If user is not verified, they might need to be redirected
-      const errorMsg = err.response?.data?.message || "Invalid credentials";
+      console.log(err.response);
+      console.log(err.response?.data);
+
+      const errorMsg =
+        err.response?.data?.message || "Invalid credentials";
+
       setError(errorMsg);
-      
+
+      // Redirect to OTP verification if needed
       if (errorMsg.includes("verify your account")) {
-        // Optionally provide a way to resend OTP or redirect to verification
         setTimeout(() => {
-          navigate("/verify-otp", { state: { email: formData.email } });
+          navigate("/verify-otp", {
+            state: { email: formData.email },
+          });
         }, 3000);
       }
     } finally {
@@ -54,11 +72,13 @@ const Login = () => {
     <div className="auth-container">
       <div className="auth-card">
         <h2>Welcome Back</h2>
+
         {error && <div className="error-msg">{error}</div>}
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Email Address</label>
+
             <input
               type="email"
               name="email"
@@ -69,9 +89,10 @@ const Login = () => {
               placeholder="john@example.com"
             />
           </div>
-          
+
           <div className="form-group">
             <label>Password</label>
+
             <input
               type="password"
               name="password"
@@ -82,19 +103,33 @@ const Login = () => {
               placeholder="Enter your password"
             />
           </div>
-          
-          <div style={{ textAlign: "right", marginBottom: "1rem" }}>
-            <Link to="/forgot-password" className="link">Forgot Password?</Link>
+
+          <div
+            style={{
+              textAlign: "right",
+              marginBottom: "1rem",
+            }}
+          >
+            <Link to="/forgot-password" className="link">
+              Forgot Password?
+            </Link>
           </div>
-          
-          <button type="submit" className="btn" disabled={loading}>
+
+          <button
+            type="submit"
+            className="btn"
+            disabled={loading}
+          >
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
-        
+
         <div className="text-center mt-3">
           <p>
-            Don't have an account? <Link to="/signup" className="link">Sign up</Link>
+            Don't have an account?{" "}
+            <Link to="/signup" className="link">
+              Sign up
+            </Link>
           </p>
         </div>
       </div>
