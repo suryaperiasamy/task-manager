@@ -2,13 +2,19 @@ const nodemailer = require("nodemailer");
 
 // Create a reusable transporter using Nodemailer
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // Use STARTTLS
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: parseInt(process.env.SMTP_PORT) || 587,
+  secure: process.env.SMTP_PORT === "465", // true for 465, false for other ports
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  tls: {
+    // This helps bypass some cloud network restrictions
+    rejectUnauthorized: false
+  },
+  logger: true, // Log everything to the console for debugging
+  debug: true   // Include SMTP traffic in the logs
 });
 
 const sendEmail = async (to, subject, text) => {
