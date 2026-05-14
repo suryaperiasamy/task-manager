@@ -1,9 +1,11 @@
 import axios from "axios";
 
 // Create an Axios instance with base URL
+const baseURL = import.meta.env.VITE_API_URL || "http://127.0.0.1:5001/api";
+console.log("Current API Base URL:", baseURL);
+
 const API = axios.create({
-  // Use the environment variable from Render, or fallback to local testing port 5001
-  baseURL: import.meta.env.VITE_API_URL || "http://127.0.0.1:5001/api",
+  baseURL: baseURL,
 });
 
 // Add a request interceptor to automatically attach the JWT token to headers
