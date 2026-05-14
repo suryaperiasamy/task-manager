@@ -61,14 +61,16 @@ const signup = async (req, res) => {
 
       if (emailSent) {
         console.log("OTP Email sent successfully!");
+        return res.status(201).json({
+          message: "User registered successfully. Please check your email for the OTP to verify your account.",
+          email: user.email,
+        });
       } else {
         console.error("FAILED to send OTP Email.");
+        return res.status(500).json({ 
+          message: "User created, but we couldn't send the OTP email. Please check your email settings." 
+        });
       }
-
-      res.status(201).json({
-        message: "User registered successfully. Please check your email for the OTP to verify your account.",
-        email: user.email,
-      });
     } else {
       res.status(400).json({ message: "Invalid user data received" });
     }
