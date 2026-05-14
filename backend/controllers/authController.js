@@ -91,20 +91,25 @@ const verifyOtp = async (req, res) => {
 
     const user = await User.findOne({ email });
 
-    // Check if user exists and OTP matches
+    // Check if user exists
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // EMERGENCY BYPASS: Allow 000000 for testing
-    if (otp === "000000") {
-      console.log("!!! Emergency Bypass OTP used !!!");
-    } else if (user.otp !== otp) {
-      return res.status(400).json({ message: "Invalid OTP" });
-    }
+    // EMERGENCY BYPASS: Allow 000000 to skip all checks for testing
+    const isBypass = (otp === "000000");
 
-    if (user.otpExpires < new Date()) {
-      return res.status(400).json({ message: "OTP has expired. Please request a new one." });
+    if (!isBypass) {
+      // Regular checks
+      if (user.otp !== otp) {
+        return res.status(400).json({ message: "Invalid OTP" });
+      }
+
+      if (user.otpExpires < new Date()) {
+        return res.status(400).json({ message: "OTP has expired. Please request a new one." });
+      }
+    } else {
+      console.log("!!! Emergency Bypass OTP used for email:", email);
     }
 
     // Mark user as verified and clear OTP fields
