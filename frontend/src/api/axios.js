@@ -1,9 +1,11 @@
 import axios from "axios";
 
-// Automatically switch between local testing and live production
-const baseURL = import.meta.env.MODE === "development" 
-  ? "http://127.0.0.1:5001/api" 
-  : "https://task-manager-api-i25w.onrender.com/api";
+// Use environment variables for the API URL, or fallback to sensible defaults
+const baseURL = import.meta.env.VITE_API_URL || (
+  import.meta.env.MODE === "development" 
+    ? "http://localhost:5001/api" 
+    : "https://task-manager-api-i25w.onrender.com/api"
+);
 
 const API = axios.create({
   baseURL: baseURL,

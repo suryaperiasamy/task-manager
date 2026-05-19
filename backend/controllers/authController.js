@@ -51,26 +51,46 @@ const signup = async (req, res) => {
       otpExpires,
     });
 
+    console.log(`>>> User created in DB: ${user.email}, isVerified: ${user.isVerified}`);
+
     if (user) {
+      // Log OTP to console for easy development access
+      console.log(`>>> OTP for ${user.email}: ${otp}`);
+
       // Send OTP to email
       const emailSent = await sendEmail(
         user.email,
         "Verify your Task Manager Account",
-        `Your verification OTP is: ${otp}. It will expire in 10 minutes.`
+        `Your verification OTP is: ${otp}. It will expire in 10 minutes.`,
+        otp
       );
 
       if (emailSent) {
         console.log("OTP Email sent successfully!");
         return res.status(201).json({
-          message: "User registered successfully. Please check your email for the OTP to verify your account.",
+          message: `User registered successfully. ${process.env.NODE_ENV !== 'production' ? `[DEV ONLY] OTP is: ${otp}` : 'Please check your email for the OTP to verify your account.'}`,
           email: user.email,
+          ...(process.env.NODE_ENV !== 'production' && { otp })
         });
       } else {
-        console.error("FAILED to send OTP Email. Check your server logs for details.");
+        console.error("FAILED to send OTP Email.");
+        
+        // Only set bypass OTP if explicitly allowed in environment
+        if (process.env.ALLOW_OTP_BYPASS === "true") {
+          console.log(">>> Setting DB OTP to 000000 for bypass (Testing Enabled)");
+          user.otp = "000000";
+          await user.save();
+        }
+
         return res.status(201).json({ 
-          message: "User created, but we had trouble sending the email. For testing, please use OTP: 000000",
+          message: "User created, but we had trouble sending the email.",
           email: user.email,
-          debug: "Email failed to send. Check backend logs."
+          ...(process.env.ALLOW_OTP_BYPASS === "true" ? { 
+            otp: "000000",
+            debug: "Email failed. Using test bypass 000000."
+          } : {
+            debug: "Email failed. Please check backend logs for SMTP errors."
+          })
         });
       }
     } else {
@@ -96,12 +116,14 @@ const verifyOtp = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // EMERGENCY BYPASS: Allow 000000 to skip all checks for testing
-    const isBypass = (otp === "000000");
+    // EMERGENCY BYPASS: Allow 000000 to skip all checks for testing IF enabled in .env
+    const isBypass = (otp === "000000" && process.env.ALLOW_OTP_BYPASS === "true");
 
     if (!isBypass) {
       // Regular checks
+      console.log(`>>> Verifying OTP for ${email}. Input: "${otp}", DB: "${user.otp}"`);
       if (user.otp !== otp) {
+        console.log(`>>> OTP MISMATCH for ${email}`);
         return res.status(400).json({ message: "Invalid OTP" });
       }
 
@@ -145,7 +167,9 @@ const login = async (req, res) => {
     }
 
     // Compare provided password with hashed password in database
+    console.log(`>>> Login attempt for: ${email}`);
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log(`>>> Password match for ${email}: ${isMatch}`);
 
     if (isMatch) {
       // Send successful response with JWT token
@@ -156,6 +180,7 @@ const login = async (req, res) => {
         token: generateToken(user._id),
       });
     } else {
+      console.log(`>>> LOGIN FAILED: Invalid password for ${email}`);
       res.status(401).json({ message: "Invalid email or password" });
     }
   } catch (error) {
@@ -182,14 +207,21 @@ const forgotPassword = async (req, res) => {
     user.otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     await user.save();
 
+    // Log OTP to console
+    console.log(`>>> Password Reset OTP for ${user.email}: ${otp}`);
+
     // Send email
     await sendEmail(
       user.email,
       "Password Reset for Task Manager",
-      `Your password reset OTP is: ${otp}. It will expire in 10 minutes.`
+      `Your password reset OTP is: ${otp}. It will expire in 10 minutes.`,
+      otp
     );
 
-    res.status(200).json({ message: "Password reset OTP sent to email" });
+    res.status(200).json({ 
+      message: `Password reset OTP sent to email. ${process.env.NODE_ENV !== 'production' ? `[DEV ONLY] OTP is: ${otp}` : ''}`,
+      ...(process.env.NODE_ENV !== 'production' && { otp })
+    });
   } catch (error) {
     console.error("Forgot Password Error:", error);
     res.status(500).json({ message: "Server error during password reset request" });

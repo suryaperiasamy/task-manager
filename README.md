@@ -40,23 +40,27 @@ npm install
 ```
 
 Configure Environment Variables:
-1. Copy the `.env.example` file or create a new `.env` file in the `backend` directory.
-2. Ensure you have the following variables set up:
+1. Copy the `.env.example` file to create a `.env` file in the `backend` directory:
+   ```bash
+   cp .env.example .env
+   ```
+2. Open the `.env` file and configure the variables. You have two options for sending OTP emails:
+   - **Method A (Recommended for Cloud Hosts like Render):** Add a `BREVO_API_KEY` (Sign up at Brevo.com for a free account to get an API key). This uses standard HTTP over port 443 which is never blocked by hosts like Render.
+   - **Method B (For Local Development):** Set `SMTP_HOST`, `SMTP_PORT`, `EMAIL_USER`, and `EMAIL_PASS` (Gmail App Password).
+3. Ensure you have the following basic variables set up:
 ```env
-PORT=5000
-MONGO_URI=mongodb://127.0.0.1:27017/task-manager
+PORT=5001
+MONGO_URI=mongodb+srv://... (Your Atlas URI)
 JWT_SECRET=your_super_secret_jwt_key
-SMTP_HOST=smtp.ethereal.email
-SMTP_PORT=587
-EMAIL_USER=your_email@ethereal.email
-EMAIL_PASS=your_email_password
+FRONTEND_URL=http://localhost:5173
+ALLOW_OTP_BYPASS=true
 ```
-*(Note: You can generate test SMTP credentials quickly using [Ethereal Email](https://ethereal.email/))*
+
 
 Start the Backend Server:
 ```bash
-# This will run the server on http://localhost:5000
-node server.js
+# This will run the server on http://localhost:5001
+npm run dev
 ```
 
 ### 3. Frontend Setup
@@ -64,6 +68,13 @@ Open a **new terminal window**, navigate to the `frontend` directory, and instal
 ```bash
 cd task-manager/frontend
 npm install
+
+Configure Environment Variables:
+1. Create a `.env.development` file in the `frontend` directory.
+2. Add the following:
+```env
+VITE_API_URL=http://localhost:5001/api
+```
 ```
 
 Start the Frontend Development Server:
