@@ -70,9 +70,6 @@ const VerifyOTP = () => {
               placeholder="123456"
               style={{ textAlign: "center", letterSpacing: "5px", fontSize: "1.25rem" }}
             />
-            <p className="text-center" style={{ marginTop: "0.5rem", fontSize: "0.8rem", color: "var(--primary-color)", fontWeight: "bold" }}>
-              Hint for testing: Use OTP 000000
-            </p>
           </div>
           
           <button type="submit" className="btn" disabled={loading}>
